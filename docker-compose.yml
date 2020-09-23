@@ -1,0 +1,39 @@
+version: '3.8'
+
+networks:
+  setup-network:
+    driver: bridge
+
+services:
+  database:
+    image: postgres:11.5-alpine
+    container_name: setup-database
+    hostname: setup-database
+    networks:
+      - setup-network
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_DB=test
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=test
+    restart: always
+
+  api:
+    build: .
+    container_name: setup-api
+    hostname: setup-api
+    networks:
+      - setup-network
+    depends_on:
+      - database
+    volumes:
+      - ./:/usr/app
+    ports:
+      - '3333:3333'
+    entrypoint: sh .docker/entrypoint.sh
+    environment:
+      - SERVER_PORT=3333
+
+
+
